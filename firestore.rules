@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'damonward38@gmail.com' ||
+        request.auth.token.email == 'damoneward38@gmail.com'
+      );
+    }
+
+    // Admins collection
+    match /admins/{adminId} {
+      allow get: if isValidId(adminId) && isSignedIn() && (request.auth.uid == adminId || isAdmin());
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Orders collection
+    match /orders/{orderId} {
+      allow get: if isValidId(orderId) && (isAdmin() || (isSignedIn() && resource.data.customerEmail == request.auth.token.email));
+      allow list: if isAdmin() || (isSignedIn() && resource.data.customerEmail == request.auth.token.email);
+      allow create: if isValidId(orderId) && (
+        isAdmin() ||
+        (isSignedIn() && request.resource.data.customerEmail == request.auth.token.email) ||
+        (request.resource.data.orderId == orderId && request.resource.data.amount is number)
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    // Licenses collection
+    match /licenses/{licenseId} {
+      allow get: if isValidId(licenseId) && (isAdmin() || (isSignedIn() && resource.data.customerEmail == request.auth.token.email));
+      allow list: if isAdmin() || (isSignedIn() && resource.data.customerEmail == request.auth.token.email);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isAdmin() || (isSignedIn() && request.auth.uid == userId));
+      allow list: if isAdmin();
+      allow create, update: if isValidId(userId) && isSignedIn() && request.auth.uid == userId;
+      allow delete: if isAdmin();
+    }
+  }
+}

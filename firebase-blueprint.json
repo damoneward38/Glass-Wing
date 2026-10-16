@@ -1,0 +1,170 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Registered or authenticated user profile",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User email address",
+          "maxLength": 254
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name",
+          "maxLength": 100
+        },
+        "role": {
+          "type": "string",
+          "description": "User permission role",
+          "enum": ["admin", "customer", "developer"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["email", "role", "createdAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Software license purchase orders",
+      "type": "object",
+      "properties": {
+        "orderId": {
+          "type": "string",
+          "description": "Unique order identifier",
+          "maxLength": 64
+        },
+        "customerEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Email of purchasing user",
+          "maxLength": 254
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Billing name",
+          "maxLength": 128
+        },
+        "plan": {
+          "type": "string",
+          "description": "Purchased plan name",
+          "enum": ["starter", "pro", "enterprise"]
+        },
+        "billingCycle": {
+          "type": "string",
+          "description": "Billing cadence",
+          "enum": ["monthly", "annual"]
+        },
+        "amount": {
+          "type": "number",
+          "description": "Order total in USD"
+        },
+        "status": {
+          "type": "string",
+          "description": "Payment and fulfillment status",
+          "enum": ["completed", "processing", "refunded"]
+        },
+        "licenseKey": {
+          "type": "string",
+          "description": "Issued Glass Wing license key",
+          "maxLength": 64
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Order placement timestamp"
+        }
+      },
+      "required": ["orderId", "customerEmail", "plan", "amount", "status", "licenseKey", "createdAt"]
+    },
+    "License": {
+      "title": "License",
+      "description": "Issued software licenses for Glass Wing",
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "License activation key",
+          "maxLength": 64
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Associated order ID",
+          "maxLength": 64
+        },
+        "customerEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Licensed owner email",
+          "maxLength": 254
+        },
+        "plan": {
+          "type": "string",
+          "description": "Entitled tier",
+          "enum": ["starter", "pro", "enterprise"]
+        },
+        "seats": {
+          "type": "number",
+          "description": "Number of developer seats"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether license is valid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Issue date"
+        }
+      },
+      "required": ["key", "orderId", "customerEmail", "plan", "active", "createdAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Designated administrator identity record",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Administrator email",
+          "maxLength": 254
+        },
+        "role": {
+          "type": "string",
+          "description": "Admin authorization tier",
+          "enum": ["superadmin", "admin"]
+        },
+        "grantedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Grant timestamp"
+        }
+      },
+      "required": ["email", "role", "grantedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User account profiles"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Purchase orders for Glass Wing licenses"
+    },
+    "/licenses/{licenseId}": {
+      "schema": { "$ref": "#/entities/License" },
+      "description": "Activated software licenses"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Designated administrators with backend privileges"
+    }
+  }
+}
