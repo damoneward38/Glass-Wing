@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, ShieldCheck, Copy, Download, ArrowLeft, CreditCard, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { PlanType, BillingCycle, Order, License } from '../types';

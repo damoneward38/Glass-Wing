@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createHmac, timingSafeEqual } from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -113,27 +114,37 @@ const licenses: LicenseRecord[] = [
 ];
 
 // Admin Credentials
-const ADMIN_EMAILS = ['damonward38@gmail.com', 'damoneward38@gmail.com'];
-const ADMIN_PASSWORD = '313damon';
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(v => v.trim().toLowerCase()).filter(Boolean);
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 
-// Middleware for admin verification
-const verifyAdminToken = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Unauthorized: missing admin bearer token' });
-  }
-  const token = authHeader.split(' ')[1];
+// Admin tokens are signed, expiring sessions. Configure AUTH_TOKEN_SECRET (32+ chars).
+const AUTH_TOKEN_SECRET = process.env.AUTH_TOKEN_SECRET || '';
+const issueAdminToken = (email: string) => {
+  if (AUTH_TOKEN_SECRET.length < 32) throw new Error('AUTH_TOKEN_SECRET must be at least 32 characters');
+  const payload = Buffer.from(JSON.stringify({ email, exp: Math.floor(Date.now() / 1000) + 28800 })).toString('base64url');
+  return payload + '.' + createHmac('sha256', AUTH_TOKEN_SECRET).update(payload).digest('base64url');
+};
+const readAdminToken = (token: string): any => {
+  if (AUTH_TOKEN_SECRET.length < 32 || !token || token.length > 4096) return null;
+  const parts = token.split('.');
+  if (parts.length !== 2) return null;
+  const expected = createHmac('sha256', AUTH_TOKEN_SECRET).update(parts[0]).digest();
+  let actual: Buffer;
+  try { actual = Buffer.from(parts[1], 'base64url'); } catch { return null; }
+  if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return null;
   try {
-    const decoded = Buffer.from(token, 'base64').toString('utf-8');
-    const [email, secret] = decoded.split(':::');
-    if (ADMIN_EMAILS.includes(email.toLowerCase()) && secret === ADMIN_PASSWORD) {
-      (req as any).adminUser = { email, role: 'admin' };
-      return next();
-    }
-  } catch {
-    // decode error
-  }
-  return res.status(403).json({ error: 'Forbidden: invalid admin authorization' });
+    const data = JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8'));
+    const emails = (process.env.ADMIN_EMAILS || '').split(',').map(v => v.trim().toLowerCase()).filter(Boolean);
+    if (!emails.includes(String(data.email).toLowerCase()) || !Number.isFinite(data.exp) || data.exp <= Math.floor(Date.now() / 1000)) return null;
+    return data;
+  } catch { return null; }
+};
+const verifyAdminToken = (req: Request, res: Response, next: NextFunction) => {
+  const header = req.headers.authorization || '';
+  const admin = header.startsWith('Bearer ') ? readAdminToken(header.slice(7)) : null;
+  if (!admin) return res.status(401).json({ error: 'Valid administrator session required' });
+  (req as any).adminUser = admin;
+  return next();
 };
 
 // API Routes
@@ -146,193 +157,32 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// Admin login
+// Admin login uses deployment secrets; no default password is shipped in source.
 app.post('/api/auth/admin-login', (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
-  }
-
+  const { email, password } = req.body || {};
+  const emails = (process.env.ADMIN_EMAILS || '').split(',').map(v => v.trim().toLowerCase()).filter(Boolean);
+  const configuredPassword = process.env.ADMIN_PASSWORD || '';
+  if (!configuredPassword || AUTH_TOKEN_SECRET.length < 32 || emails.length === 0) return res.status(503).json({ error: 'Admin authentication is not configured' });
+  if (typeof email !== 'string' || typeof password !== 'string' || password.length > 1024) return res.status(400).json({ error: 'Email and password are required' });
   const normalizedEmail = email.trim().toLowerCase();
-  if (ADMIN_EMAILS.includes(normalizedEmail) && password === ADMIN_PASSWORD) {
-    const token = Buffer.from(`${normalizedEmail}:::${password}`).toString('base64');
-    return res.json({
-      success: true,
-      token,
-      user: {
-        email: normalizedEmail,
-        role: 'admin',
-        displayName: 'Damon Ward (Administrator)',
-        permissions: ['all', 'manage_orders', 'manage_licenses', 'system_metrics']
-      }
-    });
-  }
-
-  return res.status(401).json({
-    error: 'Invalid admin credentials. Please verify your email and password.'
-  });
+  if (!emails.includes(normalizedEmail) || password !== configuredPassword) return res.status(401).json({ error: 'Invalid admin credentials' });
+  return res.json({ success: true, token: issueAdminToken(normalizedEmail), user: { email: normalizedEmail, role: 'admin', displayName: 'Administrator', permissions: ['manage_orders', 'manage_licenses', 'system_metrics'] } });
 });
 
 // Verify current session
 app.get('/api/auth/me', (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ authenticated: false });
-  }
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded = Buffer.from(token, 'base64').toString('utf-8');
-    const [email, secret] = decoded.split(':::');
-    if (ADMIN_EMAILS.includes(email.toLowerCase()) && secret === ADMIN_PASSWORD) {
-      return res.json({
-        authenticated: true,
-        user: {
-          email: email.toLowerCase(),
-          role: 'admin',
-          displayName: 'Damon Ward (Administrator)'
-        }
-      });
-    }
-  } catch {
-    // invalid
-  }
-  return res.status(401).json({ authenticated: false });
+  const header = req.headers.authorization || '';
+  const admin = header.startsWith('Bearer ') ? readAdminToken(header.slice(7)) : null;
+  if (!admin) return res.status(401).json({ authenticated: false });
+  return res.json({ authenticated: true, user: { email: admin.email, role: 'admin', displayName: 'Administrator' } });
 });
 
-// Checkout submission
-app.post('/api/checkout', (req, res) => {
-  try {
-    const { plan, billingCycle, customerName, customerEmail, paymentMethod, cardLast4, couponCode } = req.body;
+// Fail closed until checkout is connected to verified payment processing.
+app.post('/api/checkout', (_req, res) => res.status(503).json({ success: false, error: 'Checkout is unavailable until verified payment processing is configured. No order or license was created.' }));
 
-    if (!customerEmail || !customerName || !plan) {
-      return res.status(400).json({ error: 'Missing required checkout fields: customerEmail, customerName, and plan are mandatory.' });
-    }
-
-    let basePrice = 0;
-    if (plan === 'starter') {
-      basePrice = 0;
-    } else if (plan === 'pro') {
-      basePrice = billingCycle === 'annual' ? 348 : 41;
-    } else if (plan === 'enterprise') {
-      basePrice = billingCycle === 'annual' ? 1788 : 199;
-    }
-
-    let discount = 0;
-    if (couponCode) {
-      const code = couponCode.trim().toUpperCase();
-      if (code === 'GLASS30') {
-        discount = Math.round(basePrice * 0.3);
-      } else if (code === 'VIPADMIN') {
-        discount = basePrice;
-      }
-    }
-
-    const finalAmount = Math.max(0, basePrice - discount);
-    const orderId = `GW-ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-    const licenseKey = `GW-${plan.toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-
-    const newOrder: OrderRecord = {
-      orderId,
-      customerEmail: customerEmail.trim().toLowerCase(),
-      customerName: customerName.trim(),
-      plan,
-      billingCycle: billingCycle || 'annual',
-      amount: finalAmount,
-      status: 'completed',
-      licenseKey,
-      paymentMethod: paymentMethod === 'card' ? `Credit Card (•••• ${cardLast4 || '4242'})` : (paymentMethod || 'Credit Card'),
-      createdAt: new Date().toISOString()
-    };
-
-    orders.unshift(newOrder);
-
-    const seatsMap = { starter: 1, pro: 5, enterprise: 50 };
-    const newLicense: LicenseRecord = {
-      key: licenseKey,
-      orderId,
-      customerEmail: newOrder.customerEmail,
-      customerName: newOrder.customerName,
-      plan,
-      seats: seatsMap[plan as 'starter' | 'pro' | 'enterprise'] || 1,
-      active: true,
-      createdAt: newOrder.createdAt
-    };
-
-    licenses.unshift(newLicense);
-
-    return res.status(201).json({
-      success: true,
-      order: newOrder,
-      license: newLicense,
-      message: 'Checkout completed successfully. License key issued.'
-    });
-  } catch (err) {
-    console.error('Checkout error:', err);
-    return res.status(500).json({ error: 'Failed to process checkout transaction' });
-  }
-});
-
-// Orders retrieval (public with email filter, or all if admin)
-app.get('/api/orders', (req, res) => {
-  const { email } = req.query;
-  const authHeader = req.headers.authorization;
-  let isAdmin = false;
-
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
-    try {
-      const decoded = Buffer.from(token, 'base64').toString('utf-8');
-      const [tokenEmail, secret] = decoded.split(':::');
-      if (ADMIN_EMAILS.includes(tokenEmail.toLowerCase()) && secret === ADMIN_PASSWORD) {
-        isAdmin = true;
-      }
-    } catch {
-      // not admin
-    }
-  }
-
-  if (isAdmin) {
-    return res.json({ orders });
-  }
-
-  if (email) {
-    const filtered = orders.filter(o => o.customerEmail === String(email).toLowerCase());
-    return res.json({ orders: filtered });
-  }
-
-  return res.status(401).json({ error: 'Provide email query parameter or authenticate as admin' });
-});
-
-// Licenses retrieval
-app.get('/api/licenses', (req, res) => {
-  const { email } = req.query;
-  const authHeader = req.headers.authorization;
-  let isAdmin = false;
-
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
-    try {
-      const decoded = Buffer.from(token, 'base64').toString('utf-8');
-      const [tokenEmail, secret] = decoded.split(':::');
-      if (ADMIN_EMAILS.includes(tokenEmail.toLowerCase()) && secret === ADMIN_PASSWORD) {
-        isAdmin = true;
-      }
-    } catch {
-      // not admin
-    }
-  }
-
-  if (isAdmin) {
-    return res.json({ licenses });
-  }
-
-  if (email) {
-    const filtered = licenses.filter(l => l.customerEmail === String(email).toLowerCase());
-    return res.json({ licenses: filtered });
-  }
-
-  return res.status(401).json({ error: 'Provide email query parameter or authenticate as admin' });
-});
+// Order and license records are private; email query parameters are not authentication.
+app.get('/api/orders', verifyAdminToken, (_req, res) => res.json({ orders }));
+app.get('/api/licenses', verifyAdminToken, (_req, res) => res.json({ licenses }));
 
 // Admin actions: Revoke license
 app.post('/api/admin/licenses/revoke', verifyAdminToken, (req, res) => {
@@ -369,7 +219,7 @@ app.post('/api/admin/licenses/create', verifyAdminToken, (req, res) => {
 });
 
 // System telemetry and engine stats
-app.get('/api/system/stats', (_req, res) => {
+app.get('/api/system/stats', verifyAdminToken, (_req, res) => {
   const totalRevenue = orders.reduce((sum, o) => sum + o.amount, 0);
   const activeLicensesCount = licenses.filter(l => l.active).length;
 
@@ -384,7 +234,7 @@ app.get('/api/system/stats', (_req, res) => {
       totalRevenue,
       totalOrders: orders.length,
       activeLicenses: activeLicensesCount,
-      adminAccounts: ADMIN_EMAILS
+      adminAccounts: (process.env.ADMIN_EMAILS || '').split(',').map(v => v.trim()).filter(Boolean)
     }
   });
 });

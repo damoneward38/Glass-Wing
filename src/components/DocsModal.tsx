@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Copy, Check, Terminal, Code2, BookOpen, Layers, Cpu } from 'lucide-react';
 
