@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShieldCheck, Lock, LogOut, RefreshCw, Key, ShoppingBag, 
@@ -15,7 +16,7 @@ interface AdminPortalProps {
 export function AdminPortal({ onBack, onOpenCheckout }: AdminPortalProps) {
   // Authentication State
   const [emailInput, setEmailInput] = useState('damonward38@gmail.com');
-  const [passwordInput, setPasswordInput] = useState('313damon');
+  const [passwordInput, setPasswordInput] = useState('');
   const [adminUser, setAdminUser] = useState<AdminUser | null>(() => {
     const saved = sessionStorage.getItem('gw_admin_token');
     if (saved) {
@@ -57,26 +58,26 @@ export function AdminPortal({ onBack, onOpenCheckout }: AdminPortalProps) {
     latencyMs?: number;
     details: string;
   }[]>([
-    { id: '1', target: 'Hero Primary CTA ("Start Free Trial")', category: 'Navigation', status: 'passed', latencyMs: 12, details: 'Opens Checkout with Pro trial pre-selected' },
-    { id: '2', target: 'Hero Secondary CTA ("View Docs →")', category: 'Navigation', status: 'passed', latencyMs: 8, details: 'Opens interactive Documentation modal' },
-    { id: '3', target: 'Hero Window Controls (Red / Yellow / Green)', category: 'Window Engine', status: 'passed', latencyMs: 4, details: 'Triggers scale & opacity window spring cycle' },
-    { id: '4', target: 'Window Control Panel Opacity Slider', category: 'Interactivity', status: 'passed', latencyMs: 6, details: 'Applies real-time CSS backdrop and alpha to mockup' },
-    { id: '5', target: 'Window Control Panel Blur Slider', category: 'Interactivity', status: 'passed', latencyMs: 5, details: 'Modifies px blur radius from 12px to 48px' },
-    { id: '6', target: 'Navbar Logo ("Glass Wing")', category: 'Navigation', status: 'passed', latencyMs: 2, details: 'Smooth-scrolls to top hero section' },
-    { id: '7', target: 'Navbar "Features" anchor', category: 'Navigation', status: 'passed', latencyMs: 3, details: 'Scrolls to Core Capabilities section' },
-    { id: '8', target: 'Navbar "Docs" anchor', category: 'Navigation', status: 'passed', latencyMs: 4, details: 'Opens technical documentation & code snippets' },
-    { id: '9', target: 'Navbar "Pricing" anchor', category: 'Navigation', status: 'passed', latencyMs: 3, details: 'Scrolls directly to pricing grid' },
-    { id: '10', target: 'Pricing Monthly / Annual Toggle', category: 'Pricing Engine', status: 'passed', latencyMs: 5, details: 'Toggles 30% discount logic ($41 vs $29/mo)' },
-    { id: '11', target: 'Starter Plan "Start Free Trial"', category: 'Checkout', status: 'passed', latencyMs: 9, details: 'Loads $0 Starter Plan into checkout form' },
-    { id: '12', target: 'Pro Plan "Start 14-Day Trial"', category: 'Checkout', status: 'passed', latencyMs: 11, details: 'Loads $29/mo Pro Plan into checkout form' },
-    { id: '13', target: 'Enterprise Plan "Contact Sales / Enterprise"', category: 'Checkout', status: 'passed', latencyMs: 10, details: 'Loads $149/mo Enterprise Plan into checkout' },
-    { id: '14', target: 'Checkout Coupon Validator ("GLASS30")', category: 'Checkout', status: 'passed', latencyMs: 18, details: 'Deducts 30% from checkout total with instant recalculation' },
-    { id: '15', target: 'Checkout Credit Card Luhn & Formats', category: 'Security', status: 'passed', latencyMs: 7, details: 'Validates 16 digits, MM/YY expiration, and 3-digit CVC' },
-    { id: '16', target: 'Backend Order Pipeline (/api/checkout)', category: 'API Backend', status: 'passed', latencyMs: 42, details: 'Creates Order, issues unique GW- License Key' },
-    { id: '17', target: 'License Key One-Click Copy Button', category: 'Utilities', status: 'passed', latencyMs: 3, details: 'Copies cryptographic key string to system clipboard' },
-    { id: '18', target: 'Starter Kit Download Button', category: 'Utilities', status: 'passed', latencyMs: 15, details: 'Generates and downloads glasswing-license.json file' },
-    { id: '19', target: 'Admin Authentication (damonward38@gmail.com / 313damon)', category: 'Security', status: 'passed', latencyMs: 24, details: 'Generates valid base64 Bearer token' },
-    { id: '20', target: 'Admin License Revoke / Reissue Trigger', category: 'Admin Tools', status: 'passed', latencyMs: 29, details: 'Toggles active boolean on license key in database' }
+    { id: '1', target: 'Hero Primary CTA ("Start Free Trial")', category: 'Navigation', status: 'pending', latencyMs: 12, details: 'Opens Checkout with Pro trial pre-selected' },
+    { id: '2', target: 'Hero Secondary CTA ("View Docs →")', category: 'Navigation', status: 'pending', latencyMs: 8, details: 'Opens interactive Documentation modal' },
+    { id: '3', target: 'Hero Window Controls (Red / Yellow / Green)', category: 'Window Engine', status: 'pending', latencyMs: 4, details: 'Triggers scale & opacity window spring cycle' },
+    { id: '4', target: 'Window Control Panel Opacity Slider', category: 'Interactivity', status: 'pending', latencyMs: 6, details: 'Applies real-time CSS backdrop and alpha to mockup' },
+    { id: '5', target: 'Window Control Panel Blur Slider', category: 'Interactivity', status: 'pending', latencyMs: 5, details: 'Modifies px blur radius from 12px to 48px' },
+    { id: '6', target: 'Navbar Logo ("Glass Wing")', category: 'Navigation', status: 'pending', latencyMs: 2, details: 'Smooth-scrolls to top hero section' },
+    { id: '7', target: 'Navbar "Features" anchor', category: 'Navigation', status: 'pending', latencyMs: 3, details: 'Scrolls to Core Capabilities section' },
+    { id: '8', target: 'Navbar "Docs" anchor', category: 'Navigation', status: 'pending', latencyMs: 4, details: 'Opens technical documentation & code snippets' },
+    { id: '9', target: 'Navbar "Pricing" anchor', category: 'Navigation', status: 'pending', latencyMs: 3, details: 'Scrolls directly to pricing grid' },
+    { id: '10', target: 'Pricing Monthly / Annual Toggle', category: 'Pricing Engine', status: 'pending', latencyMs: 5, details: 'Toggles 30% discount logic ($41 vs $29/mo)' },
+    { id: '11', target: 'Starter Plan "Start Free Trial"', category: 'Checkout', status: 'pending', latencyMs: 9, details: 'Loads $0 Starter Plan into checkout form' },
+    { id: '12', target: 'Pro Plan "Start 14-Day Trial"', category: 'Checkout', status: 'pending', latencyMs: 11, details: 'Loads $29/mo Pro Plan into checkout form' },
+    { id: '13', target: 'Enterprise Plan "Contact Sales / Enterprise"', category: 'Checkout', status: 'pending', latencyMs: 10, details: 'Loads $149/mo Enterprise Plan into checkout' },
+    { id: '14', target: 'Checkout Coupon Validator ("GLASS30")', category: 'Checkout', status: 'pending', latencyMs: 18, details: 'Deducts 30% from checkout total with instant recalculation' },
+    { id: '15', target: 'Checkout Credit Card Luhn & Formats', category: 'Security', status: 'pending', latencyMs: 7, details: 'Validates 16 digits, MM/YY expiration, and 3-digit CVC' },
+    { id: '16', target: 'Backend Order Pipeline (/api/checkout)', category: 'API Backend', status: 'pending', latencyMs: 42, details: 'Creates Order, issues unique GW- License Key' },
+    { id: '17', target: 'License Key One-Click Copy Button', category: 'Utilities', status: 'pending', latencyMs: 3, details: 'Copies cryptographic key string to system clipboard' },
+    { id: '18', target: 'Starter Kit Download Button', category: 'Utilities', status: 'pending', latencyMs: 15, details: 'Generates and downloads glasswing-license.json file' },
+    { id: '19', target: 'Admin Authentication (deployment-configured credentials)', category: 'Security', status: 'pending', latencyMs: 24, details: 'Requires signed, expiring administrator token' },
+    { id: '20', target: 'Admin License Revoke / Reissue Trigger', category: 'Admin Tools', status: 'pending', latencyMs: 29, details: 'Toggles active boolean on license key in database' }
   ]);
 
   const fetchAdminData = async (token?: string) => {
@@ -217,7 +218,7 @@ export function AdminPortal({ onBack, onOpenCheckout }: AdminPortalProps) {
     for (let i = 0; i < auditResults.length; i++) {
       setAuditResults(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'pending' } : item));
       await new Promise(r => setTimeout(r, 60));
-      setAuditResults(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'passed', latencyMs: Math.floor(Math.random() * 20) + 3 } : item));
+      setAuditResults(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'pending', latencyMs: Math.floor(Math.random() * 20) + 3 } : item));
     }
     setAuditRunning(false);
   };
@@ -290,7 +291,7 @@ export function AdminPortal({ onBack, onOpenCheckout }: AdminPortalProps) {
               <span className="text-cyan-vibrant font-bold">Admin Account Configured: </span>
               <span className="font-mono text-white/80">damonward38@gmail.com</span>
               <div className="text-[11px] text-white/40 mt-1">
-                Password: <code className="bg-black/40 px-1.5 py-0.5 rounded text-cyan-vibrant">313damon</code>
+                Password: <code className="bg-black/40 px-1.5 py-0.5 rounded text-cyan-vibrant">configured securely</code>
               </div>
             </div>
 
