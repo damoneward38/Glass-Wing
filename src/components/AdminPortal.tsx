@@ -58,26 +58,26 @@ export function AdminPortal({ onBack, onOpenCheckout }: AdminPortalProps) {
     latencyMs?: number;
     details: string;
   }[]>([
-    { id: '1', target: 'Hero Primary CTA ("Start Free Trial")', category: 'Navigation', status: 'pending', latencyMs: 12, details: 'Opens Checkout with Pro trial pre-selected' },
-    { id: '2', target: 'Hero Secondary CTA ("View Docs →")', category: 'Navigation', status: 'pending', latencyMs: 8, details: 'Opens interactive Documentation modal' },
-    { id: '3', target: 'Hero Window Controls (Red / Yellow / Green)', category: 'Window Engine', status: 'pending', latencyMs: 4, details: 'Triggers scale & opacity window spring cycle' },
-    { id: '4', target: 'Window Control Panel Opacity Slider', category: 'Interactivity', status: 'pending', latencyMs: 6, details: 'Applies real-time CSS backdrop and alpha to mockup' },
-    { id: '5', target: 'Window Control Panel Blur Slider', category: 'Interactivity', status: 'pending', latencyMs: 5, details: 'Modifies px blur radius from 12px to 48px' },
-    { id: '6', target: 'Navbar Logo ("Glass Wing")', category: 'Navigation', status: 'pending', latencyMs: 2, details: 'Smooth-scrolls to top hero section' },
-    { id: '7', target: 'Navbar "Features" anchor', category: 'Navigation', status: 'pending', latencyMs: 3, details: 'Scrolls to Core Capabilities section' },
-    { id: '8', target: 'Navbar "Docs" anchor', category: 'Navigation', status: 'pending', latencyMs: 4, details: 'Opens technical documentation & code snippets' },
-    { id: '9', target: 'Navbar "Pricing" anchor', category: 'Navigation', status: 'pending', latencyMs: 3, details: 'Scrolls directly to pricing grid' },
-    { id: '10', target: 'Pricing Monthly / Annual Toggle', category: 'Pricing Engine', status: 'pending', latencyMs: 5, details: 'Toggles 30% discount logic ($41 vs $29/mo)' },
-    { id: '11', target: 'Starter Plan "Start Free Trial"', category: 'Checkout', status: 'pending', latencyMs: 9, details: 'Loads $0 Starter Plan into checkout form' },
-    { id: '12', target: 'Pro Plan "Start 14-Day Trial"', category: 'Checkout', status: 'pending', latencyMs: 11, details: 'Loads $29/mo Pro Plan into checkout form' },
-    { id: '13', target: 'Enterprise Plan "Contact Sales / Enterprise"', category: 'Checkout', status: 'pending', latencyMs: 10, details: 'Loads $149/mo Enterprise Plan into checkout' },
-    { id: '14', target: 'Checkout Coupon Validator ("GLASS30")', category: 'Checkout', status: 'pending', latencyMs: 18, details: 'Deducts 30% from checkout total with instant recalculation' },
-    { id: '15', target: 'Checkout Credit Card Luhn & Formats', category: 'Security', status: 'pending', latencyMs: 7, details: 'Validates 16 digits, MM/YY expiration, and 3-digit CVC' },
-    { id: '16', target: 'Backend Order Pipeline (/api/checkout)', category: 'API Backend', status: 'pending', latencyMs: 42, details: 'Creates Order, issues unique GW- License Key' },
-    { id: '17', target: 'License Key One-Click Copy Button', category: 'Utilities', status: 'pending', latencyMs: 3, details: 'Copies cryptographic key string to system clipboard' },
-    { id: '18', target: 'Starter Kit Download Button', category: 'Utilities', status: 'pending', latencyMs: 15, details: 'Generates and downloads glasswing-license.json file' },
-    { id: '19', target: 'Admin Authentication (deployment-configured credentials)', category: 'Security', status: 'pending', latencyMs: 24, details: 'Requires signed, expiring administrator token' },
-    { id: '20', target: 'Admin License Revoke / Reissue Trigger', category: 'Admin Tools', status: 'pending', latencyMs: 29, details: 'Toggles active boolean on license key in database' }
+    { id: '1', target: 'Hero Primary CTA ("Start Free Trial")', category: 'Navigation', status: 'pending', details: 'Opens Checkout with Pro trial pre-selected' },
+    { id: '2', target: 'Hero Secondary CTA ("View Docs →")', category: 'Navigation', status: 'pending', details: 'Opens interactive Documentation modal' },
+    { id: '3', target: 'Hero Window Controls (Red / Yellow / Green)', category: 'Window Engine', status: 'pending', details: 'Triggers scale & opacity window spring cycle' },
+    { id: '4', target: 'Window Control Panel Opacity Slider', category: 'Interactivity', status: 'pending', details: 'Applies real-time CSS backdrop and alpha to mockup' },
+    { id: '5', target: 'Window Control Panel Blur Slider', category: 'Interactivity', status: 'pending', details: 'Modifies px blur radius from 12px to 48px' },
+    { id: '6', target: 'Navbar Logo ("Glass Wing")', category: 'Navigation', status: 'pending', details: 'Smooth-scrolls to top hero section' },
+    { id: '7', target: 'Navbar "Features" anchor', category: 'Navigation', status: 'pending', details: 'Scrolls to Core Capabilities section' },
+    { id: '8', target: 'Navbar "Docs" anchor', category: 'Navigation', status: 'pending', details: 'Opens technical documentation & code snippets' },
+    { id: '9', target: 'Navbar "Pricing" anchor', category: 'Navigation', status: 'pending', details: 'Scrolls directly to pricing grid' },
+    { id: '10', target: 'Pricing Monthly / Annual Toggle', category: 'Pricing Engine', status: 'pending', details: 'Toggles 30% discount logic ($41 vs $29/mo)' },
+    { id: '11', target: 'Starter Plan "Start Free Trial"', category: 'Checkout', status: 'pending', details: 'Loads $0 Starter Plan into checkout form' },
+    { id: '12', target: 'Pro Plan "Start 14-Day Trial"', category: 'Checkout', status: 'pending', details: 'Loads $29/mo Pro Plan into checkout form' },
+    { id: '13', target: 'Enterprise Plan "Contact Sales / Enterprise"', category: 'Checkout', status: 'pending', details: 'Loads $149/mo Enterprise Plan into checkout' },
+    { id: '14', target: 'Checkout Coupon Validator ("GLASS30")', category: 'Checkout', status: 'pending', details: 'Deducts 30% from checkout total with instant recalculation' },
+    { id: '15', target: 'Checkout Credit Card Luhn & Formats', category: 'Security', status: 'pending', details: 'Validates 16 digits, MM/YY expiration, and 3-digit CVC' },
+    { id: '16', target: 'Backend Order Pipeline (/api/checkout)', category: 'API Backend', status: 'pending', details: 'Creates Order, issues unique GW- License Key' },
+    { id: '17', target: 'License Key One-Click Copy Button', category: 'Utilities', status: 'pending', details: 'Copies cryptographic key string to system clipboard' },
+    { id: '18', target: 'Starter Kit Download Button', category: 'Utilities', status: 'pending', details: 'Generates and downloads glasswing-license.json file' },
+    { id: '19', target: 'Admin Authentication (deployment-configured credentials)', category: 'Security', status: 'pending', details: 'Requires signed, expiring administrator token' },
+    { id: '20', target: 'Admin License Revoke / Reissue Trigger', category: 'Admin Tools', status: 'pending', details: 'Toggles active boolean on license key in database' }
   ]);
 
   const fetchAdminData = async (token?: string) => {
@@ -214,11 +214,32 @@ export function AdminPortal({ onBack, onOpenCheckout }: AdminPortalProps) {
 
   const runLiveButtonAudit = async () => {
     setAuditRunning(true);
-    // Simulate real step-by-step verification
-    for (let i = 0; i < auditResults.length; i++) {
-      setAuditResults(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'pending' } : item));
-      await new Promise(r => setTimeout(r, 60));
-      setAuditResults(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'pending', latencyMs: Math.floor(Math.random() * 20) + 3 } : item));
+    for (const item of auditResults) {
+      const started = performance.now();
+      const quoted = item.target.match(/"([^"]+)"/)?.[1];
+      const needle = (quoted || item.target).toLowerCase();
+      const controls = Array.from(document.querySelectorAll<HTMLElement>('button, a, [role="button"], input, select'));
+      const control = controls.find(element => {
+        const text = (element.textContent || '').trim().toLowerCase();
+        const label = (element.getAttribute('aria-label') || '').toLowerCase();
+        return text.includes(needle) || label.includes(needle);
+      });
+
+      let status: 'passed' | 'failed' = 'failed';
+      let details = `${item.details} · control not found in the current DOM`;
+      if (control) {
+        const rect = control.getBoundingClientRect();
+        const style = getComputedStyle(control);
+        const visible = rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+        const enabled = !(control as HTMLButtonElement).disabled && control.getAttribute('aria-disabled') !== 'true';
+        status = visible && enabled ? 'passed' : 'failed';
+        details = `${item.details} · ${visible ? 'visible' : 'hidden'}, ${enabled ? 'enabled' : 'disabled'}`;
+      }
+
+      setAuditResults(prev => prev.map(result => result.id === item.id
+        ? { ...result, status, latencyMs: Math.round(performance.now() - started), details }
+        : result));
+      await new Promise(resolve => setTimeout(resolve, 40));
     }
     setAuditRunning(false);
   };
@@ -370,7 +391,7 @@ export function AdminPortal({ onBack, onOpenCheckout }: AdminPortalProps) {
         <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} icon={<Activity className="w-4 h-4" />} label="Overview" />
         <TabButton active={activeTab === 'orders'} onClick={() => setActiveTab('orders')} icon={<ShoppingBag className="w-4 h-4" />} label={`Orders (${orders.length})`} />
         <TabButton active={activeTab === 'licenses'} onClick={() => setActiveTab('licenses')} icon={<Key className="w-4 h-4" />} label={`Licenses (${licenses.length})`} />
-        <TabButton active={activeTab === 'audit'} onClick={() => setActiveTab('audit')} icon={<CheckCircle2 className="w-4 h-4" />} label="Button Audit Matrix (20/20 Passed)" />
+        <TabButton active={activeTab === 'audit'} onClick={() => setActiveTab('audit')} icon={<CheckCircle2 className="w-4 h-4" />} label="Button Audit Matrix" />
         <TabButton active={activeTab === 'system'} onClick={() => setActiveTab('system')} icon={<Server className="w-4 h-4" />} label="Engine Telemetry" />
       </div>
 

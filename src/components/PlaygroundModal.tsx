@@ -29,8 +29,8 @@ export function PlaygroundModal({ isOpen, onClose, onOpenCheckout }: PlaygroundM
       noise
     },
     monitorIndex: activeMonitor,
-    gpuAcceleration: true,
-    renderEngine: "DirectComposition-v2.4"
+    gpuAcceleration: "browser-managed",
+    renderEngine: "CSS backdrop-filter"
   };
 
   const copyConfig = () => {
@@ -55,7 +55,7 @@ export function PlaygroundModal({ isOpen, onClose, onOpenCheckout }: PlaygroundM
             </span>
             <div>
               <div className="font-bold text-sm text-white">Glass Wing Interactive Acrylic Sandbox</div>
-              <div className="text-[10px] font-mono text-cyan-vibrant">Real-Time GPU Hardware Compositor Preview</div>
+              <div className="text-[10px] font-mono text-cyan-vibrant">Live CSS Compositor Preview</div>
             </div>
           </div>
 
@@ -229,9 +229,9 @@ export function PlaygroundModal({ isOpen, onClose, onOpenCheckout }: PlaygroundM
               />
             </div>
 
-            {/* Multi-monitor simulation */}
+            {/* Multi-monitor preview */}
             <div className="space-y-2 pt-2 border-t border-white/10">
-              <span className="text-xs text-white/70">Simulated Display Output</span>
+              <span className="text-xs text-white/70">Display Selection</span>
               <div className="grid grid-cols-3 gap-2">
                 {[1, 2, 3].map((mon) => (
                   <button
